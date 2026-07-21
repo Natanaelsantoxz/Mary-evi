@@ -22,6 +22,8 @@
       <button class="tab active" data-tab="ordens">Ordens de Serviço</button>
       <button class="tab" data-tab="estoque">Estoque</button>
       <button class="tab" data-tab="faturamento">Faturamento</button>
+      <button class="tab" data-tab="despesas">Despesas</button>
+      <button class="tab" data-tab="calculadora">Calculadora</button>
     </nav>
   </div>
 </header>
@@ -155,6 +157,118 @@
     </div>
   </section>
 
+  <!-- DESPESAS -->
+  <section class="panel" id="panel-despesas">
+    <div class="panel-head">
+      <div>
+        <h1>Despesas</h1>
+        <p class="hint">Gastos fixos (aluguel, contas) e variáveis (materiais extras, transporte pontual).</p>
+      </div>
+      <button class="btn-primary" id="btn-nova-despesa">+ Nova despesa</button>
+    </div>
+
+    <div class="cards-row">
+      <div class="stat-card stat-verde">
+        <span class="stat-label">Total despesas fixas</span>
+        <span class="stat-value" id="stat-despesa-fixa">R$ 0,00</span>
+      </div>
+      <div class="stat-card stat-dourado">
+        <span class="stat-label">Total despesas variáveis</span>
+        <span class="stat-value" id="stat-despesa-variavel">R$ 0,00</span>
+      </div>
+      <div class="stat-card stat-rosa">
+        <span class="stat-label">Total geral</span>
+        <span class="stat-value" id="stat-despesa-total">R$ 0,00</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tabela-despesas">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Categoria</th>
+            <th>Data</th>
+            <th>Valor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="corpo-despesas"></tbody>
+      </table>
+      <p class="empty-state" id="despesas-vazio" hidden>Nenhuma despesa cadastrada ainda.</p>
+    </div>
+  </section>
+
+  <!-- CALCULADORA -->
+  <section class="panel" id="panel-calculadora">
+    <div class="panel-head">
+      <div>
+        <h1>Calculadora de serviço</h1>
+        <p class="hint">Horas trabalhadas + material + transporte = quanto cobrar.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="padding:20px;">
+      <form id="form-calculo" style="display:flex; flex-direction:column; gap:16px;">
+        <div class="field-row">
+          <label>Nome do serviço/cliente
+            <input type="text" id="calc-nome" placeholder="Ex.: Ajuste vestido Ana">
+          </label>
+        </div>
+        <div class="field-row">
+          <label>Horas trabalhadas
+            <input type="number" id="calc-horas" min="0" step="0.25" placeholder="0">
+          </label>
+          <label>Valor por hora (R$)
+            <input type="number" id="calc-valor-hora" min="0" step="0.01" placeholder="0,00">
+          </label>
+        </div>
+        <div class="field-row">
+          <label>Material (R$)
+            <input type="number" id="calc-material" min="0" step="0.01" placeholder="0,00">
+          </label>
+          <label>Transporte (R$)
+            <input type="number" id="calc-transporte" min="0" step="0.01" placeholder="0,00">
+          </label>
+        </div>
+
+        <div class="cards-row" style="margin:0;">
+          <div class="stat-card stat-linho">
+            <span class="stat-label">Mão de obra</span>
+            <span class="stat-value" id="calc-resultado-mao">R$ 0,00</span>
+          </div>
+          <div class="stat-card stat-verde">
+            <span class="stat-label">Total a cobrar</span>
+            <span class="stat-value" id="calc-resultado-total">R$ 0,00</span>
+          </div>
+        </div>
+
+        <div class="modal-actions" style="margin-top:0;">
+          <button type="button" class="btn-primary" id="btn-salvar-calculo">Salvar no histórico</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table-wrap" style="margin-top:20px;">
+      <h2 class="table-title">Histórico de cálculos</h2>
+      <table id="tabela-calculos">
+        <thead>
+          <tr>
+            <th>Serviço/Cliente</th>
+            <th>Horas</th>
+            <th>Mão de obra</th>
+            <th>Material</th>
+            <th>Transporte</th>
+            <th>Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="corpo-calculos"></tbody>
+      </table>
+      <p class="empty-state" id="calculos-vazio" hidden>Nenhum cálculo salvo ainda.</p>
+    </div>
+  </section>
+
 </main>
 
 <!-- MODAL ORDEM -->
@@ -246,6 +360,40 @@
   </div>
 </div>
 
+<!-- MODAL DESPESA -->
+<div class="modal-backdrop" id="modal-despesa-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="despesa-modal-titulo">Nova despesa</h2>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <form id="form-despesa">
+      <input type="hidden" id="despesa-id">
+      <label>Descrição
+        <input type="text" id="despesa-descricao" required placeholder="Ex.: Aluguel do ateliê">
+      </label>
+      <div class="field-row">
+        <label>Categoria
+          <select id="despesa-categoria">
+            <option value="Fixa">Despesa Fixa</option>
+            <option value="Variável">Despesa Variável</option>
+          </select>
+        </label>
+        <label>Valor (R$)
+          <input type="number" id="despesa-valor" min="0" step="0.01" required placeholder="0,00">
+        </label>
+        <label>Data
+          <input type="date" id="despesa-data" required>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close>Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar despesa</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </body>
-</html>
+  </html>
