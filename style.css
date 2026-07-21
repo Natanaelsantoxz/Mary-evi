@@ -72,8 +72,21 @@ h1,h2{
   color:var(--rosa);
 }
 .tabs{
-  display:flex;
-  gap:4px;
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar{
+  display: none;
+}
+
+.tab{
+  flex: 0 0 auto;
 }
 .tab{
   background:transparent;
