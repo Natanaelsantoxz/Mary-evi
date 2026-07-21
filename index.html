@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>maryéve atelier — ordens & estoque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="tape-top" aria-hidden="true"></div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <span class="brand-script">maryéve</span>
+      <span class="brand-sub">atelier · ordens de serviço</span>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="ordens">Ordens de Serviço</button>
+      <button class="tab" data-tab="estoque">Estoque</button>
+      <button class="tab" data-tab="faturamento">Faturamento</button>
+    </nav>
+  </div>
+</header>
+
+<main class="content">
+
+  <!-- ORDENS DE SERVIÇO -->
+  <section class="panel active" id="panel-ordens">
+    <div class="panel-head">
+      <div>
+        <h1>Ordens de serviço</h1>
+        <p class="hint">Cada peça que entra pelo ateliê, registrada com defeito, cliente e valor combinado.</p>
+      </div>
+      <button class="btn-primary" id="btn-nova-ordem">+ Nova ordem</button>
+    </div>
+
+    <div class="filter-row">
+      <input type="search" id="busca-ordem" placeholder="Buscar por cliente, defeito ou nº da ordem…">
+      <select id="filtro-status">
+        <option value="">Todos os status</option>
+        <option value="Recebido">Recebido</option>
+        <option value="Em andamento">Em andamento</option>
+        <option value="Concluído">Concluído</option>
+        <option value="Entregue">Entregue</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table id="tabela-ordens">
+        <thead>
+          <tr>
+            <th>Nº</th>
+            <th>Cliente</th>
+            <th>Contato</th>
+            <th>Defeito / Serviço</th>
+            <th>Entrada</th>
+            <th>Previsão</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Pago</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="corpo-ordens"></tbody>
+      </table>
+      <p class="empty-state" id="ordens-vazio" hidden>Nenhuma ordem ainda. Toque em <strong>+ Nova ordem</strong> para abrir a primeira ficha.</p>
+    </div>
+  </section>
+
+  <!-- ESTOQUE -->
+  <section class="panel" id="panel-estoque">
+    <div class="panel-head">
+      <div>
+        <h1>Estoque</h1>
+        <p class="hint">Aviamentos, tecidos e materiais do ateliê — quantidade e custo por unidade.</p>
+      </div>
+      <button class="btn-primary" id="btn-novo-item">+ Novo item</button>
+    </div>
+
+    <div class="filter-row">
+      <input type="search" id="busca-estoque" placeholder="Buscar por item ou categoria…">
+    </div>
+
+    <div class="table-wrap">
+      <table id="tabela-estoque">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Un.</th>
+            <th>Valor unitário</th>
+            <th>Valor em estoque</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="corpo-estoque"></tbody>
+      </table>
+      <p class="empty-state" id="estoque-vazio" hidden>Estoque vazio. Cadastre tecidos, linhas e aviamentos com <strong>+ Novo item</strong>.</p>
+    </div>
+  </section>
+
+  <!-- FATURAMENTO -->
+  <section class="panel" id="panel-faturamento">
+    <div class="panel-head">
+      <div>
+        <h1>Faturamento</h1>
+        <p class="hint">O que já entrou, o que está a receber, mês a mês.</p>
+      </div>
+    </div>
+
+    <div class="cards-row">
+      <div class="stat-card stat-verde">
+        <span class="stat-label">Faturado (pago)</span>
+        <span class="stat-value" id="stat-pago">R$ 0,00</span>
+      </div>
+      <div class="stat-card stat-dourado">
+        <span class="stat-label">A receber</span>
+        <span class="stat-value" id="stat-a-receber">R$ 0,00</span>
+      </div>
+      <div class="stat-card stat-rosa">
+        <span class="stat-label">Ordens no mês atual</span>
+        <span class="stat-value" id="stat-qtd-mes">0</span>
+      </div>
+      <div class="stat-card stat-linho">
+        <span class="stat-label">Valor total em estoque</span>
+        <span class="stat-value" id="stat-estoque-valor">R$ 0,00</span>
+      </div>
+    </div>
+
+    <div class="chart-block">
+      <h2>Faturamento por mês</h2>
+      <div class="bars" id="grafico-mensal"></div>
+    </div>
+
+    <div class="table-wrap">
+      <h2 class="table-title">Ordens pagas</h2>
+      <table id="tabela-faturamento">
+        <thead>
+          <tr>
+            <th>Nº</th>
+            <th>Cliente</th>
+            <th>Defeito / Serviço</th>
+            <th>Data</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="corpo-faturamento"></tbody>
+      </table>
+      <p class="empty-state" id="faturamento-vazio" hidden>Nenhuma ordem paga ainda.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL ORDEM -->
+<div class="modal-backdrop" id="modal-ordem-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="ordem-modal-titulo">Nova ordem de serviço</h2>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <form id="form-ordem">
+      <input type="hidden" id="ordem-id">
+      <div class="field-row">
+        <label>Nome do cliente
+          <input type="text" id="ordem-cliente" required placeholder="Ex.: Ana Beatriz">
+        </label>
+        <label>Contato (telefone/WhatsApp)
+          <input type="text" id="ordem-contato" required placeholder="Ex.: (11) 91234-5678">
+        </label>
+      </div>
+      <label>Defeito / serviço solicitado
+        <textarea id="ordem-defeito" required rows="3" placeholder="Ex.: Ajuste de barra, zíper trocado, mancha na lateral…"></textarea>
+      </label>
+      <div class="field-row">
+        <label>Valor do trabalho (R$)
+          <input type="number" id="ordem-valor" min="0" step="0.01" required placeholder="0,00">
+        </label>
+        <label>Data de entrada
+          <input type="date" id="ordem-data" required>
+        </label>
+        <label>Previsão de entrega
+          <input type="date" id="ordem-previsao">
+        </label>
+      </div>
+      <div class="field-row">
+        <label>Status
+          <select id="ordem-status">
+            <option>Recebido</option>
+            <option>Em andamento</option>
+            <option>Concluído</option>
+            <option>Entregue</option>
+          </select>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="ordem-pago">
+          Pagamento recebido
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close>Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar ordem</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL ESTOQUE -->
+<div class="modal-backdrop" id="modal-estoque-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="estoque-modal-titulo">Novo item de estoque</h2>
+      <button class="modal-close" data-close>&times;</button>
+    </div>
+    <form id="form-estoque">
+      <input type="hidden" id="estoque-id">
+      <label>Nome do item
+        <input type="text" id="estoque-nome" required placeholder="Ex.: Linha de poliéster preta">
+      </label>
+      <div class="field-row">
+        <label>Categoria
+          <input type="text" id="estoque-categoria" placeholder="Ex.: Aviamento, Tecido, Linha…">
+        </label>
+        <label>Unidade
+          <input type="text" id="estoque-unidade" placeholder="Ex.: un, m, rolo, kg">
+        </label>
+      </div>
+      <div class="field-row">
+        <label>Quantidade
+          <input type="number" id="estoque-quantidade" min="0" step="0.01" required placeholder="0">
+        </label>
+        <label>Valor unitário (R$)
+          <input type="number" id="estoque-valor" min="0" step="0.01" required placeholder="0,00">
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" data-close>Cancelar</button>
+        <button type="submit" class="btn-primary">Salvar item</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
