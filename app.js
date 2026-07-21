@@ -48,6 +48,8 @@ document.querySelectorAll('.tab').forEach(tab=>{
     tab.classList.add('active');
     document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
     if(tab.dataset.tab === 'faturamento') renderFaturamento();
+    if(tab.dataset.tab === 'despesas') renderDespesas();
+    if(tab.dataset.tab === 'calculadora') renderCalculos();
   });
 });
 
@@ -278,7 +280,6 @@ function renderFaturamento(){
   document.getElementById('stat-qtd-mes').textContent = qtdMesAtual;
   document.getElementById('stat-estoque-valor').textContent = formatarMoeda(totalEstoque);
 
-  // gráfico por mês (últimos 6 meses com dados, baseado em ordens pagas)
   const porMes = {};
   pagas.forEach(o=>{
     const chave = (o.data||'').slice(0,7);
@@ -310,7 +311,6 @@ function renderFaturamento(){
     });
   }
 
-  // tabela de ordens pagas
   const corpo = document.getElementById('corpo-faturamento');
   corpo.innerHTML = '';
   document.getElementById('faturamento-vazio').hidden = pagas.length > 0;
@@ -327,15 +327,173 @@ function renderFaturamento(){
   });
 }
 
+// ---------- DESPESAS ----------
+const STORAGE_DESPESAS = 'maryeve_despesas';
+let despesas = carregar(STORAGE_DESPESAS);
+
+function badgeCategoria(cat){
+  return cat === 'Fixa'
+    ? `<span class="badge badge-concluido">Fixa</span>`
+    : `<span class="badge badge-andamento">Variável</span>`;
+}
+
+function renderDespesas(){
+  const totalFixa = despesas.filter(d=>d.categoria==='Fixa').reduce((s,d)=>s+(d.valor||0),0);
+  const totalVariavel = despesas.filter(d=>d.categoria==='Variável').reduce((s,d)=>s+(d.valor||0),0);
+
+  document.getElementById('stat-despesa-fixa').textContent = formatarMoeda(totalFixa);
+  document.getElementById('stat-despesa-variavel').textContent = formatarMoeda(totalVariavel);
+  document.getElementById('stat-despesa-total').textContent = formatarMoeda(totalFixa+totalVariavel);
+
+  const corpo = document.getElementById('corpo-despesas');
+  corpo.innerHTML = '';
+  document.getElementById('despesas-vazio').hidden = despesas.length > 0;
+
+  despesas.slice().sort((a,b)=>(b.data||'').localeCompare(a.data||'')).forEach(d=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(d.descricao)}</td>
+      <td>${badgeCategoria(d.categoria)}</td>
+      <td>${formatarData(d.data)}</td>
+      <td>${formatarMoeda(d.valor)}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" title="Editar" data-editar-despesa="${d.id}">✎</button>
+          <button class="icon-btn" title="Excluir" data-excluir-despesa="${d.id}">🗑</button>
+        </div>
+      </td>
+    `;
+    corpo.appendChild(tr);
+  });
+
+  corpo.querySelectorAll('[data-editar-despesa]').forEach(btn=>{
+    btn.addEventListener('click', ()=> abrirModalDespesa(btn.dataset.editarDespesa));
+  });
+  corpo.querySelectorAll('[data-excluir-despesa]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(confirm('Excluir esta despesa?')){
+        despesas = despesas.filter(d=>d.id !== btn.dataset.excluirDespesa);
+        salvar(STORAGE_DESPESAS, despesas);
+        renderDespesas();
+      }
+    });
+  });
+}
+
+const modalDespesaBackdrop = document.getElementById('modal-despesa-backdrop');
+const formDespesa = document.getElementById('form-despesa');
+
+function abrirModalDespesa(id){
+  formDespesa.reset();
+  document.getElementById('despesa-id').value = '';
+  document.getElementById('despesa-modal-titulo').textContent = 'Nova despesa';
+  document.getElementById('despesa-data').value = new Date().toISOString().slice(0,10);
+
+  if(id){
+    const d = despesas.find(x=>x.id === id);
+    if(d){
+      document.getElementById('despesa-modal-titulo').textContent = 'Editar despesa';
+      document.getElementById('despesa-id').value = d.id;
+      document.getElementById('despesa-descricao').value = d.descricao;
+      document.getElementById('despesa-categoria').value = d.categoria;
+      document.getElementById('despesa-valor').value = d.valor;
+      document.getElementById('despesa-data').value = d.data;
+    }
+  }
+  modalDespesaBackdrop.classList.add('open');
+}
+
+document.getElementById('btn-nova-despesa').addEventListener('click', ()=> abrirModalDespesa(null));
+
+formDespesa.addEventListener('submit', e=>{
+  e.preventDefault();
+  const id = document.getElementById('despesa-id').value;
+  const dados = {
+    descricao: document.getElementById('despesa-descricao').value.trim(),
+    categoria: document.getElementById('despesa-categoria').value,
+    valor: parseFloat(document.getElementById('despesa-valor').value) || 0,
+    data: document.getElementById('despesa-data').value
+  };
+  if(id){
+    const idx = despesas.findIndex(d=>d.id === id);
+    despesas[idx] = {...despesas[idx], ...dados};
+  } else {
+    despesas.push({ id: gerarId(), ...dados });
+  }
+  salvar(STORAGE_DESPESAS, despesas);
+  fecharModais();
+  renderDespesas();
+});
+
+// ---------- CALCULADORA ----------
+const STORAGE_CALCULOS = 'maryeve_calculos';
+let calculos = carregar(STORAGE_CALCULOS);
+
+function calcularResultado(){
+  const horas = parseFloat(document.getElementById('calc-horas').value) || 0;
+  const valorHora = parseFloat(document.getElementById('calc-valor-hora').value) || 0;
+  const material = parseFloat(document.getElementById('calc-material').value) || 0;
+  const transporte = parseFloat(document.getElementById('calc-transporte').value) || 0;
+
+  const maoDeObra = horas * valorHora;
+  const total = maoDeObra + material + transporte;
+
+  document.getElementById('calc-resultado-mao').textContent = formatarMoeda(maoDeObra);
+  document.getElementById('calc-resultado-total').textContent = formatarMoeda(total);
+
+  return { horas, valorHora, material, transporte, maoDeObra, total };
+}
+
+['calc-horas','calc-valor-hora','calc-material','calc-transporte'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', calcularResultado);
+});
+
+function renderCalculos(){
+  const corpo = document.getElementById('corpo-calculos');
+  corpo.innerHTML = '';
+  document.getElementById('calculos-vazio').hidden = calculos.length > 0;
+
+  calculos.slice().reverse().forEach(c=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(c.nome || '—')}</td>
+      <td>${c.horas}</td>
+      <td>${formatarMoeda(c.maoDeObra)}</td>
+      <td>${formatarMoeda(c.material)}</td>
+      <td>${formatarMoeda(c.transporte)}</td>
+      <td><strong>${formatarMoeda(c.total)}</strong></td>
+      <td><button class="icon-btn" title="Excluir" data-excluir-calculo="${c.id}">🗑</button></td>
+    `;
+    corpo.appendChild(tr);
+  });
+
+  corpo.querySelectorAll('[data-excluir-calculo]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      calculos = calculos.filter(c=>c.id !== btn.dataset.excluirCalculo);
+      salvar(STORAGE_CALCULOS, calculos);
+      renderCalculos();
+    });
+  });
+}
+
+document.getElementById('btn-salvar-calculo').addEventListener('click', ()=>{
+  const r = calcularResultado();
+  const nome = document.getElementById('calc-nome').value.trim();
+  calculos.push({ id: gerarId(), nome, ...r });
+  salvar(STORAGE_CALCULOS, calculos);
+  renderCalculos();
+});
+
 // ---------- Modais: fechar ----------
 function fecharModais(){
   modalOrdemBackdrop.classList.remove('open');
   modalEstoqueBackdrop.classList.remove('open');
+  modalDespesaBackdrop.classList.remove('open');
 }
 document.querySelectorAll('[data-close]').forEach(el=>{
   el.addEventListener('click', fecharModais);
 });
-[modalOrdemBackdrop, modalEstoqueBackdrop].forEach(bd=>{
+[modalOrdemBackdrop, modalEstoqueBackdrop, modalDespesaBackdrop].forEach(bd=>{
   bd.addEventListener('click', e=>{ if(e.target === bd) fecharModais(); });
 });
 document.addEventListener('keydown', e=>{
@@ -353,3 +511,5 @@ function escapeHtml(str){
 renderOrdens();
 renderEstoque();
 renderFaturamento();
+renderDespesas();
+renderCalculos();
