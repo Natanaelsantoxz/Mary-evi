@@ -358,3 +358,114 @@ textarea{ resize:vertical; }
   .panel-head{ align-items:flex-start; }
   table, thead, tbody, th, td, tr{ font-size:.82rem; }
 }
+/* ===========================
+   RESPONSIVIDADE PARA CELULAR
+   =========================== */
+
+html,
+body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+}
+
+.masthead-inner,
+.content{
+    width:100%;
+    margin:0 auto;
+}
+
+@media (max-width:768px){
+
+    .masthead{
+        padding:16px;
+    }
+
+    .brand{
+        justify-content:center;
+        text-align:center;
+    }
+
+    .brand-script{
+        font-size:1.7rem;
+    }
+
+    .brand-sub{
+        display:block;
+        width:100%;
+        text-align:center;
+    }
+
+    .tabs{
+        display:flex;
+        overflow-x:auto;
+        white-space:nowrap;
+        flex-wrap:nowrap;
+        scrollbar-width:none;
+    }
+
+    .tabs::-webkit-scrollbar{
+        display:none;
+    }
+
+    .tab{
+        flex:0 0 auto;
+    }
+
+    .content{
+        padding:15px;
+    }
+
+    .panel-head{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .panel-head .btn-primary{
+        width:100%;
+    }
+
+    .filter-row{
+        flex-direction:column;
+    }
+
+    .filter-row input,
+    .filter-row select{
+        width:100%;
+    }
+
+    .field-row{
+        flex-direction:column;
+        gap:12px;
+    }
+
+    .field-row label{
+        width:100%;
+        min-width:100%;
+    }
+
+    .cards-row{
+        grid-template-columns:1fr;
+    }
+
+    .table-wrap{
+        overflow-x:auto;
+        -webkit-overflow-scrolling:touch;
+    }
+
+    table{
+        min-width:800px;
+    }
+
+    .modal{
+        width:95%;
+        max-height:90vh;
+    }
+
+    input,
+    select,
+    textarea,
+    button{
+        font-size:16px;
+    }
+}
