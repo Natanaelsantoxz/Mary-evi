@@ -13,12 +13,12 @@
 // Ele funciona como um segundo fator além do PIN — troque o valor abaixo por algo só seu.
 
 const firebaseConfig = {
-  apiKey: "COLE_AQUI",
-  authDomain: "COLE_AQUI.firebaseapp.com",
-  projectId: "COLE_AQUI",
-  storageBucket: "COLE_AQUI.appspot.com",
-  messagingSenderId: "COLE_AQUI",
-  appId: "COLE_AQUI"
+    apiKey: "AIzaSyCKiX1z4911pcqmW-YBIlM8pS_4bh8tdKk",
+  authDomain: "maryeve-cb30a.firebaseapp.com",
+  projectId: "maryeve-cb30a",
+  storageBucket: "maryeve-cb30a.firebasestorage.app",
+  messagingSenderId: "346433682744",
+  appId: "1:346433682744:web:b620108998695552fa15cd"
 };
 
 const FIRESTORE_DOC_ID = "maryeve-atelier-troque-isto";
