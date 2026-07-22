@@ -605,3 +605,6 @@ table{
   .keypad{ grid-template-columns:repeat(3, 64px); }
   .key{ width:64px; height:64px; font-size:1.25rem; }
 }
+#login-screen[hidden]{
+  display:none !important;
+}
